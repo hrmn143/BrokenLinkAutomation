@@ -1,0 +1,30 @@
+# ---- Python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ---- virtual environments --------------------------------------------------
+.venv/
+venv/
+env/
+
+# ---- generated artefacts (folders stay, content is ignored) ----------------
+reports/*
+!reports/.gitkeep
+screenshots/*
+!screenshots/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# ---- editors / OS ----------------------------------------------------------
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store

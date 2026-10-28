@@ -1,0 +1,41 @@
+"""Configuration package: single source of truth for the automation run."""
+
+from src.config.config import (
+    CSV_REPORT_NAME,
+    DEFAULT_IGNORE_PATTERNS,
+    DEFAULT_TARGET_URL,
+    DEFAULT_USER_AGENT,
+    HTML_REPORT_NAME,
+    LOG_FILE_NAME,
+    LOGS_DIR,
+    NON_HTTP_PREFIXES,
+    OUTPUT_DIRECTORIES,
+    PROJECT_ROOT,
+    REPORTS_DIR,
+    SCREENSHOTS_DIR,
+    SRC_DIR,
+    TESTS_DIR,
+    VALID_BROWSERS,
+    Config,
+    ensure_directories,
+)
+
+__all__ = [
+    "Config",
+    "ensure_directories",
+    "PROJECT_ROOT",
+    "SRC_DIR",
+    "TESTS_DIR",
+    "REPORTS_DIR",
+    "SCREENSHOTS_DIR",
+    "LOGS_DIR",
+    "OUTPUT_DIRECTORIES",
+    "DEFAULT_TARGET_URL",
+    "DEFAULT_USER_AGENT",
+    "DEFAULT_IGNORE_PATTERNS",
+    "NON_HTTP_PREFIXES",
+    "VALID_BROWSERS",
+    "CSV_REPORT_NAME",
+    "HTML_REPORT_NAME",
+    "LOG_FILE_NAME",
+]

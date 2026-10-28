@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Broken Link Automation Test Page</title>
+  <style>
+    :root {
+      --bg: #f4f6fb; --panel: #ffffff; --text: #1f2937; --muted: #6b7280; --line: #e5e7eb;
+      --ok: #15803d; --ok-bg: #dcfce7; --broken: #b91c1c; --broken-bg: #fee2e2;
+      --redirect: #b45309; --redirect-bg: #fef3c7; --skipped: #475569; --skipped-bg: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0 auto; padding: 32px 20px 64px; max-width: 880px; background: var(--bg);
+      color: var(--text); font: 15px/1.6 "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    header { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px 26px; }
+    h1 { margin: 0 0 6px; font-size: 26px; }
+    .sub { margin: 0; color: var(--muted); }
+    code { background: #eef2ff; color: #1d4ed8; padding: 2px 6px; border-radius: 6px; font-size: 13px; }
+    .note { margin: 14px 0 0; padding: 12px 16px; background: #eff6ff; border-left: 4px solid #1d4ed8;
+            border-radius: 8px; color: #1e3a8a; font-size: 14px; }
+    main { display: grid; gap: 14px; margin-top: 20px; }
+    section { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--line);
+              border-radius: 12px; padding: 16px 22px; }
+    section.ok { border-left-color: var(--ok); }
+    section.broken { border-left-color: var(--broken); }
+    section.redirect { border-left-color: var(--redirect); }
+    section.skipped { border-left-color: var(--skipped); }
+    h2 { margin: 0 0 8px; font-size: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+             background: var(--skipped-bg); color: var(--skipped); letter-spacing: .3px; }
+    .ok .badge { background: var(--ok-bg); color: var(--ok); }
+    .broken .badge { background: var(--broken-bg); color: var(--broken); }
+    .redirect .badge { background: var(--redirect-bg); color: var(--redirect); }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin: 4px 0; word-break: break-all; }
+    a { color: #1d4ed8; }
+    footer { margin-top: 26px; text-align: center; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Broken Link Automation Test Page</h1>
+    <p class="sub">Local demo website for the
+      <strong>Automated Web Broken Link Detection and Reporting System</strong>.</p>
+    <p class="note">
+      Every link on this page is intentional. Run
+      <code>python run.py --url http://localhost:8000</code> and compare the generated report
+      with the expectation badge of each section below.
+    </p>
+  </header>
+
+  <main>
+    <section class="ok">
+      <h2>1. Working link <span class="badge">expect 200 WORKING</span></h2>
+      <ul>
+        <li><a href="http://localhost:8000/about.html">http://localhost:8000/about.html</a></li>
+      </ul>
+    </section>
+
+    <section class="broken">
+      <h2>2. Broken link <span class="badge">expect 404 CLIENT_ERROR</span></h2>
+      <ul>
+        <li><a href="http://localhost:8000/does-not-exist">http://localhost:8000/does-not-exist</a></li>
+      </ul>
+    </section>
+
+    <section class="redirect">
+      <h2>3. Redirect link <span class="badge">expect 302 REDIRECT</span></h2>
+      <ul>
+        <li><a href="http://localhost:8000/redirect">http://localhost:8000/redirect</a>
+            &nbsp;(302 &rarr; /about.html)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4. Internal link <span class="badge">expect 200 WORKING</span></h2>
+      <ul>
+        <li><a href="about.html">about.html</a>
+            &nbsp;(relative URL, the detector resolves it to
+            http://localhost:8000/about.html)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>5. External link <span class="badge">expect 200 WORKING (needs internet)</span></h2>
+      <ul>
+        <li><a href="https://example.com">https://example.com</a>
+            &nbsp;(external domain; skipped when running with <code>--no-external</code>)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>6. Duplicate links <span class="badge">checked once, occurrences reported</span></h2>
+      <ul>
+        <li><a href="http://localhost:8000/about.html">http://localhost:8000/about.html</a>
+            &nbsp;(duplicate #1)</li>
+        <li><a href="http://localhost:8000/about.html">http://localhost:8000/about.html</a>
+            &nbsp;(duplicate #2)</li>
+      </ul>
+    </section>
+
+    <section class="skipped">
+      <h2>7. Skipped links <span class="badge">expect SKIPPED - never requested</span></h2>
+      <ul>
+        <li><a href="mailto:test@example.com">mailto:test@example.com</a>
+            &nbsp;(mail link, not checkable over HTTP)</li>
+        <li><a href="javascript:void(0)">javascript:void(0)</a>
+            &nbsp;(JavaScript link, never requested)</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    BrokenLinkAutomation demo site &middot; start it with <code>python test_site/server.py</code>
+  </footer>
+</body>
+</html>

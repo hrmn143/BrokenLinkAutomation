@@ -1,0 +1,11 @@
+# Core dependencies of the framework
+requests==2.34.2        # HTTP link validation
+selenium==4.49.0        # browser automation for link extraction
+
+# Test framework
+pytest==9.1.1
+
+# Optional: HTML report for the pytest run itself
+#   pip install -r requirements-dev.txt
+#   pytest --html=reports/pytest_report.html --self-contained-html
+pytest-html==4.2.0
