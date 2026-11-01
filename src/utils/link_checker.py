@@ -481,25 +481,33 @@ class LinkChecker:
             verify=self.config.verify_ssl,
         )
 
+    def _request(self, method: str, url: str) -> requests.Response:
+        return self.session.request(
+            method,
+            url,
+            timeout=self._timeouts,
+            allow_redirects=True,
+            stream=True,
+            verify=self.config.verify_ssl,
+        )
     def _perform(self, url: str) -> Tuple[LinkStatus, Optional[int], str, str, str]:
-        """One attempt: HEAD first, GET when the server refuses HEAD.
-
-        Redirects are followed (``allow_redirects=True``); when a redirect chain
-        ends in a success the *redirect* is reported together with the final
-        URL, so the report can show "302 -> https://..." instead of hiding it.
-        """
 
         method = "HEAD"
         response = self._request(method, url)
-        if response.status_code in HEAD_FALLBACK_STATUS_CODES:
+
+        # Try GET if HEAD returns 404 or is rejected
+        if response.status_code in HEAD_FALLBACK_STATUS_CODES or response.status_code == 404:
             response.close()
             method = "GET"
             response = self._request(method, url)
+
         try:
             final_code = response.status_code
             history = list(response.history)
+
             if history and final_code < 400:
                 first_hop = history[0]
+
                 return (
                     LinkStatus.REDIRECT,
                     first_hop.status_code,
@@ -507,6 +515,7 @@ class LinkChecker:
                     (first_hop.reason or "").strip(),
                     method,
                 )
+
             return (
                 classify_status_code(final_code),
                 final_code,
@@ -514,6 +523,7 @@ class LinkChecker:
                 (response.reason or "").strip(),
                 method,
             )
+
         finally:
             response.close()
 
