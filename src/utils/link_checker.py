@@ -92,7 +92,7 @@ def classify_status_code(status_code: int) -> LinkStatus:
         """Classify HTTP response status codes."""
          
         if status_code is None:
-            return LinkStatus.INVALID
+            return LinkStatus.CONNECTION_ERROR
 
         if status_code in BLOCKED_STATUS_CODES:
             return LinkStatus.BLOCKED
