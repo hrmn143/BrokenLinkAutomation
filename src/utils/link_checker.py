@@ -91,7 +91,7 @@ MAX_RETRY_DELAY_SECONDS = 5.0
 def classify_status_code(status_code: int) -> LinkStatus:
         """Classify HTTP response status codes."""
          
-         if status_code is None:
+        if status_code is None:
             return LinkStatus.INVALID
 
         if status_code in BLOCKED_STATUS_CODES:
