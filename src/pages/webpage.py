@@ -5,7 +5,7 @@ the whole run - a new browser per link would be unusable in practice.
 """
 
 from __future__ import annotations
-
+import time
 import re
 from dataclasses import dataclass
 from datetime import datetime
@@ -118,7 +118,7 @@ class WebPage:
         self._driver: Any = None
         self._current_url = ""
 
-    # -- browser lifecycle ------------------------------------------------
+  
     @property
     def driver(self) -> Any:
         if self._driver is None:
@@ -239,39 +239,74 @@ class WebPage:
         return self._current_url
 
     # -- extraction -------------------------------------------------------
+   
     def get_links(self, max_links: int = 0) -> List[PageLink]:
-        """Return every ``<a>`` element of the current page as :class:`PageLink`."""
+        """Fast extraction with live red highlighting in Chrome."""
 
         self.start_browser()
         self.logger.info("Extracting anchor elements ...")
+
         try:
             elements = self.driver.find_elements(By.TAG_NAME, "a")
         except WebDriverException as error:
-            raise PageLoadError(f"Could not read the anchors of the page: {error}") from error
+            raise PageLoadError(
+                f"Could not read the anchors of the page: {error}"
+            ) from error
 
         links: List[PageLink] = []
+
         for index, element in enumerate(elements):
+
             if max_links and len(links) >= max_links:
-                self.logger.warning("Stopped extracting after max_links=%s", max_links)
+                self.logger.warning(
+                    "Stopped extracting after max_links=%s", max_links
+                )
                 break
+
             try:
                 href = element.get_attribute("href") or ""
-            except WebDriverException:  # pragma: no cover - stale element
-                href = ""
-            try:
                 visible = element.is_displayed()
-            except WebDriverException:  # pragma: no cover - stale element
-                visible = True
-            links.append(
-                PageLink(
-                    href=href,
-                    text=(element.text or "").strip(),
-                    index=index,
-                    visible=visible,
+                text = (element.text or "").strip()
+
+                if href:
+                    # Instantly scroll and highlight current link
+                    self.driver.execute_script("""
+                        arguments[0].scrollIntoView({
+                            behavior: 'instant',
+                            block: 'center'
+                        });
+
+                        arguments[0].style.outline = '3px solid red';
+                        arguments[0].style.backgroundColor = 'yellow';
+                    """, element)
+
+                    print(
+                        f"[EXTRACTED {len(links) + 1}] {href}",
+                        flush=True
+                    )
+
+                    # Small delay so the highlight remains visible
+                    time.sleep(0.05)
+
+                links.append(
+                    PageLink(
+                        href=href,
+                        text=text,
+                        index=index,
+                        visible=visible
+                    )
                 )
-            )
+
+            except WebDriverException as error:
+                self.logger.warning(
+                    "Could not extract link at index %s: %s",
+                    index, error
+                )
+                continue
 
         self.logger.info("Found %s anchor element(s)", len(links))
+        print(f"\nTOTAL LINKS EXTRACTED: {len(links)}")
+
         return links
 
     # -- evidence ---------------------------------------------------------

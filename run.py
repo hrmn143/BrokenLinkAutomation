@@ -163,8 +163,7 @@ def check_inventory(inventory: LinkInventory, config: Config, logger) -> List[Li
     return inventory.merge(checked)
 
 
-# ---------------------------------------------------------------------------
-# Orchestration
+
 # ---------------------------------------------------------------------------
 def run(config: Config, logger=None) -> int:
     """Execute one complete run and return the process exit code."""

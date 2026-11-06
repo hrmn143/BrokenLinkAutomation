@@ -88,29 +88,25 @@ HEAD_FALLBACK_STATUS_CODES = frozenset({400, 403, 405, 406, 501})
 #: Never sleep longer than this between two attempts.
 MAX_RETRY_DELAY_SECONDS = 5.0
 
+def classify_status_code(status_code: int) -> LinkStatus:
+        """Classify HTTP response status codes."""
 
-def classify_status_code(status_code: Optional[int]) -> LinkStatus:
-    """Map an HTTP status code to a :class:`LinkStatus`.
+        if status_code in BLOCKED_STATUS_CODES:
+            return LinkStatus.BLOCKED
 
-    2xx -> WORKING, 3xx -> REDIRECT, 401/403/429 -> BLOCKED, other 4xx ->
-    CLIENT_ERROR, 5xx -> SERVER_ERROR.  ``None`` means the request never
-    produced a response.
-    """
+        if 200 <= status_code < 300:
+            return LinkStatus.WORKING
 
-    if status_code is None:
-        return LinkStatus.CONNECTION_ERROR
-    if 200 <= status_code <= 299:
-        return LinkStatus.WORKING
-    if 300 <= status_code <= 399:
-        return LinkStatus.REDIRECT
-    if status_code in BLOCKED_STATUS_CODES:
-        return LinkStatus.BLOCKED
-    if 400 <= status_code <= 499:
-        return LinkStatus.CLIENT_ERROR
-    if 500 <= status_code <= 599:
-        return LinkStatus.SERVER_ERROR
-    return LinkStatus.CONNECTION_ERROR
+        if 300 <= status_code < 400:
+            return LinkStatus.REDIRECT
 
+        if 400 <= status_code < 500:
+            return LinkStatus.CLIENT_ERROR
+
+        if 500 <= status_code < 600:
+            return LinkStatus.SERVER_ERROR
+
+        return LinkStatus.INVALID
 
 def classify_exception(error: BaseException) -> LinkStatus:
     """Map a ``requests`` exception to a :class:`LinkStatus`."""
@@ -136,8 +132,7 @@ def is_retryable(status: LinkStatus) -> bool:
     return status in RETRYABLE_STATUSES
 
 
-# ---------------------------------------------------------------------------
-# Link inventory - "what did the page contain, what will we check"
+
 # ---------------------------------------------------------------------------
 @dataclass
 class LinkInventory:
@@ -184,8 +179,7 @@ class LinkInventory:
         return merged
 
 
-# ---------------------------------------------------------------------------
-# URL processing
+
 # ---------------------------------------------------------------------------
 class UrlProcessor:
     """Turns raw ``href`` values into absolute, de-duplicated http(s) URLs.
@@ -211,7 +205,7 @@ class UrlProcessor:
         self.check_external_links = check_external_links
         self.logger = logger or get_logger()
 
-    # -- normalisation ---------------------------------------------------
+    
     def normalize(self, raw_url: Optional[str]) -> str:
         """Return an absolute http(s) URL without fragment, or ``""``."""
 
